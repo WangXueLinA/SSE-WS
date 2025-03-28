@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>AI SSE Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+  <style>
+    #output {
+      white-space: pre-wrap;
+      font-family: monospace;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="askBtn">询问AI</button>
+  <div id="output"></div>
+
+  <script>
+    let sse;
+
+    document.getElementById('askBtn').addEventListener('click', () => {
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+
+      // 关闭之前的连接
+      if (sse) sse.close();
+
+      // 创建新的SSE连接
+      sse = new EventSource('http://localhost:3000/sse');
+
+      sse.onmessage = async (e) => {
+        const markdown = e.data;
+        const dirtyHtml = marked.parse(markdown);
+        // 创建临时容器
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = dirtyHtml;
+
+        // 获取新增内容
+        const newContent = tempDiv.innerHTML;
+        await typeWriterEffect(output, newContent);
+      };
+
+      sse.onerror = () => {
+        sse.close();
+      };
+    });
+
+    async function typeWriterEffect(container, html) {
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+
+      // 递归处理节点
+      async function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          await addTextContent(container, node.textContent);
+        } else {
+          const el = document.createElement(node.nodeName.toLowerCase());
+          Array.from(node.attributes).forEach(attr => {
+            el.setAttribute(attr.name, attr.value);
+          });
+          container.appendChild(el);
+
+          for (const child of node.childNodes) {
+            await processNode(child);
+          }
+        }
+      }
+
+      for (const child of temp.childNodes) {
+        await processNode(child);
+      }
+    }
+
+    function addTextContent(container, text) {
+      return new Promise(resolve => {
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < text.length) {
+            container.lastChild.textContent += text[i];
+            i++;
+          } else {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 30);
+      });
+    }
+  </script>
+</body>
+
+</html>

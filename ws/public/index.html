@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>极简聊天室</title>
+  <style>
+    body {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    #logs {
+      height: 300px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .log-item {
+      margin: 5px 0;
+      padding: 3px;
+    }
+
+    .system {
+      color: #666;
+    }
+
+    .send {
+      color: green;
+    }
+
+    .receive {
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>极简聊天室</h1>
+  <div id="logs"></div>
+  <input type="text" id="input" placeholder="输入消息" />
+  <button onclick="sendMessage()">发送</button>
+
+  <script>
+    const logArea = document.getElementById('logs')
+    const input = document.getElementById('input')
+
+    // 创建 WebSocket 连接
+    const ws = new WebSocket('ws://localhost:3000')
+
+    // 记录通信日志
+    function addLog(type, message) {
+      const log = document.createElement('div')
+      log.className = `log-item ${type}`
+      log.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      logArea.appendChild(log)
+      logArea.scrollTop = logArea.scrollHeight
+    }
+
+    // 连接事件
+    ws.onopen = () => addLog('system', '已连接到服务器')
+    ws.onclose = () => addLog('system', '连接已断开')
+    ws.onerror = (e) => addLog('system', `连接错误：${e.message}`)
+
+    // 接收消息
+    ws.onmessage = (e) => {
+      addLog('receive', `收到message消息：${e.data}`)
+    }
+
+    // 发送消息
+    function sendMessage() {
+      const msg = input.value.trim()
+      if (msg) {
+        ws.send(msg)
+        addLog('send', '发送消息：' + msg)
+        input.value = ''
+      }
+    }
+
+    // 回车发送
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage()
+    })
+  </script>
+</body>
+
+</html>
