@@ -3,6 +3,7 @@
 ```shell
 ├── sse # sse实时通讯
 ├── ws # WebSocket实时通讯
+├── openAi # 基于kimi提供的sdk搭建chatgpt
 ```
 
 安装依赖
@@ -22,4 +23,10 @@ npm run sse
 
 ```shell
 npm run ws
+```
+
+### 基于kimi提供的sdk搭建chatgpt
+
+```shell
+npm run openAi
 ```

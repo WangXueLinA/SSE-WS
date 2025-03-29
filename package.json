@@ -4,18 +4,23 @@
   "main": "index.js",
   "scripts": {
     "sse": "concurrently \"node ./sse/index.js\"",
-    "ws": "concurrently \"node ./ws/index.js\""
+    "ws": "concurrently \"node ./ws/index.js\"",
+    "openAi": "concurrently \"node ./chatgpt/index.js\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@koa/cors": "^3.1.0",
     "@koa/router": "^10.0.0",
+    "crypto": "^1.0.1",
     "fs-extra": "^10.0.0",
     "koa": "^2.16.0",
+    "koa-body": "^6.0.1",
+    "koa-bodyparser": "^4.4.1",
     "koa-static": "^5.0.0",
     "koa-views": "^8.1.0",
     "koa-websocket": "^7.0.0",
+    "openai": "^4.90.0",
     "ws": "^8.18.1"
   },
   "devDependencies": {
